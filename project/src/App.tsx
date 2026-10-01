@@ -14,6 +14,12 @@ import DCFResults from '@/components/DCFResults';
 const STORAGE_KEY = 'fmp_api_key';
 
 function loadApiKey(): string {
+  // 1. Check if Vercel has the key hidden securely in the environment
+  if (import.meta.env.VITE_FMP_API_KEY) {
+    return import.meta.env.VITE_FMP_API_KEY;
+  }
+  
+  // 2. Otherwise, fall back to checking the browser
   try {
     return localStorage.getItem(STORAGE_KEY) || '';
   } catch {
