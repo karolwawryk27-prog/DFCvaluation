@@ -32,10 +32,18 @@ export async function fetchCompanyProfile(
   }
   const d = arr[0];
 
-  const mktCap = Number(d.mktCap) || 0;
-  const price = Number(d.price) || 0;
-  let shares = Number(d.sharesOutstanding) || 0;
+  // 🛑 The Truth Revealer: Print the raw API data to your browser console
+  console.log('👀 RAW API DATA FOR ' + ticker + ':', d);
 
+  // Helper to strip out commas if the API sends text like "2,500,000,000"
+  const cleanNum = (val: any) => Number(String(val || 0).replace(/,/g, '')) || 0;
+
+  // Clean the numbers and check alternate spellings
+  const mktCap = cleanNum(d.mktCap) || cleanNum(d.marketCap) || 0;
+  const price = cleanNum(d.price) || 0;
+  let shares = cleanNum(d.sharesOutstanding) || cleanNum(d.shares) || 0;
+
+  // Calculate shares if the API forgets to include them
   if (shares === 0 && mktCap > 0 && price > 0) {
     shares = mktCap / price;
   }
