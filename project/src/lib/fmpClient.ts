@@ -22,9 +22,9 @@ export async function fetchCompanyProfile(
   apiKey: string,
   ticker: string,
 ): Promise<CompanyProfile> {
-  // Fix 1: FMP API expects the ticker directly in the URL path
+  // Reverted to your original URL structure so it finds the data again!
   const data = await fetchJSON<any>(
-    `${BASE_URL}/profile/${encodeURIComponent(ticker)}?apikey=${apiKey}`,
+    `${BASE_URL}/profile?symbol=${encodeURIComponent(ticker)}&apikey=${apiKey}`,
   );
   
   const arr = Array.isArray(data) ? data : [];
@@ -33,15 +33,30 @@ export async function fetchCompanyProfile(
   }
   const d = arr[0];
 
-  // Fix 2: Force conversion to Numbers in case the API sends text strings
+  // Keeping our math fixes to prevent the trillion-dollar bug
   const mktCap = Number(d.mktCap) || 0;
   const price = Number(d.price) || 0;
   let shares = Number(d.sharesOutstanding) || 0;
 
-  // Fix 3: Calculate shares if the API forgets to include them
   if (shares === 0 && mktCap > 0 && price > 0) {
     shares = mktCap / price;
   }
+
+  return {
+    symbol: d.symbol ?? ticker,
+    companyName: d.companyName ?? ticker,
+    industry: d.industry ?? 'N/A',
+    sector: d.sector ?? 'N/A',
+    description: d.description ?? '',
+    website: d.website ?? '',
+    ceo: d.ceo ?? '',
+    mktCap: mktCap,
+    price: price,
+    sharesOutstanding: shares > 0 ? shares : 1,
+    exchange: d.exchange ?? 'N/A',
+    currency: d.currency || 'USD',
+  };
+}
 
   return {
     symbol: d.symbol ?? ticker,
